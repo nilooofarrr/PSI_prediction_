@@ -86,6 +86,36 @@ Jarque-Bera Test: This test checks for normality of residuals. The very high p-v
 Heteroskedasticity Test: Your p-value is 0.65, indicating that there's no significant evidence of heteroskedasticity. This is good, as it suggests the variability of residuals is consistent over time.
 
 
+
+Steps to Choose ARIMA Parameters
+Understand the ARIMA Model Components:
+
+AR(p): Autoregressive part with parameter p.
+I(d): Differencing part with parameter d.
+MA(q): Moving average part with parameter q.
+Determine d (Differencing Order):
+
+Use the Augmented Dickey-Fuller (ADF) test to check if the series is stationary.
+If not stationary, apply differencing (d) until stationarity is achieved. Typically, d is either 0 or 1, but sometimes it can be 2.
+Determine p (AR Order) using PACF:
+
+Plot the PACF.
+Look for the lag where the PACF cuts off or drops sharply. The significant lags up to this cutoff suggest the value of p.
+For example, if the PACF plot shows a significant spike at lag 1 and then cuts off, p might be 1.
+Determine q (MA Order) using ACF:
+
+Plot the ACF.
+Look for the lag where the ACF cuts off or drops sharply. The significant lags up to this cutoff suggest the value of q.
+For example, if the ACF plot shows a significant spike at lag 1 and then cuts off, q might be 1.
+Interpreting ACF and PACF Plots
+PACF Plot:
+
+AR(p) Model: The PACF plot helps determine p. Look for the lag where the PACF cuts off sharply. The number of significant lags up to this cutoff suggests the value of p.
+ACF Plot:
+
+MA(q) Model: The ACF plot helps determine q. Look for the lag where the ACF cuts off sharply. The number of significant lags up to this cutoff suggests the value of q.
+
+
 Summary
 Based on the diagnostic tests and the RMSE:
 
@@ -98,3 +128,5 @@ Areas of Improvement: Residuals are not perfectly normally distributed, and the 
 Compare with Other Models: Test different ARIMA configurations or other models (like SARIMA, Exponential Smoothing, etc.) to see if they provide a better fit.
 Cross-Validation: Use techniques like rolling-window cross-validation to ensure the model performs well out-of-sample.
 Model Refinement: Consider adjusting model parameters or incorporating additional features if applicable.
+
+
