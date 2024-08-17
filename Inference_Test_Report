@@ -1,0 +1,100 @@
+## ARIMA Model Forecast Results
+
+### Input Date
+
+- **Requested Date**: 2017-03-12 14:30
+
+### Data Overview
+
+- **Initial DataFrame Columns**:
+  - `national`
+  - `south`
+  - `north`
+  - `east`
+  - `central`
+  - `west`
+  - `timestamp`
+  
+- **Sample Data**:
+  ```plaintext
+  dateTime
+  2016-02-07 18:00:00+08:00        47
+  2016-02-08 23:00:00+08:00        59
+  2016-02-09 01:00:00+08:00        59
+  2016-02-09 02:00:00+08:00        59
+  2016-02-09 03:00:00+08:00        59
+
+
+Closest Matching Date
+Closest Date Found: 2017-03-12 23:00:00+08:00
+ARIMA Model Summary
+Model: ARIMA(5,1,10)
+
+Number of Observations: 24,017
+
+Log Likelihood: -35,052.025
+
+AIC: 70,136.050
+
+BIC: 70,265.434
+
+HQIC: 70,178.008
+
+Model Parameters:
+
+
+
+
+               coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+ar.L1         -0.0457      0.046     -0.992      0.321      -0.136       0.045
+ar.L2          0.9447      0.042     22.631      0.000       0.863       1.027
+ar.L3          0.8052      0.064     12.618      0.000       0.680       0.930
+ar.L4         -0.0779      0.043     -1.824      0.068      -0.162       0.006
+ar.L5         -0.8026      0.042    -18.909      0.000      -0.886      -0.719
+ma.L1          0.3209      0.046      6.949      0.000       0.230       0.411
+ma.L2         -0.7196      0.038    -19.100      0.000      -0.793      -0.646
+ma.L3         -0.8908      0.057    -15.674      0.000      -1.002      -0.779
+ma.L4         -0.2198      0.041     -5.330      0.000      -0.301      -0.139
+ma.L5          0.5974      0.030     19.592      0.000       0.538       0.657
+ma.L6          0.0767      0.008     10.080      0.000       0.062       0.092
+ma.L7          0.0830      0.009      9.304      0.000       0.066       0.100
+ma.L8          0.0535      0.009      6.077      0.000       0.036       0.071
+ma.L9          0.0300      0.007      4.187      0.000       0.016       0.044
+ma.L10         0.0336      0.007      4.890      0.000       0.020       0.047
+sigma2         1.0850      0.002    458.142      0.000       1.080       1.090
+
+
+Model Diagnostics:
+
+Ljung-Box (L1) (Q): 0.08 (p-value: 0.78)
+Jarque-Bera (JB): 1,397,008.11 (p-value: 0.00)
+Heteroskedasticity (H): 1.01 (p-value: 0.65)
+Skew: 1.31
+Kurtosis: 40.27
+Model Performance
+RMSE: 22.51
+
+
+Model Fit and Diagnostics
+Log Likelihood: This is used to calculate the AIC and BIC. While it's not a standalone metric of model quality, a higher log likelihood typically indicates a better fit.
+AIC (Akaike Information Criterion) and BIC (Bayesian Information Criterion): These are used for model comparison. Lower values generally indicate a better model. Your AIC and BIC values are high, but this isn't unusual with large datasets. Comparing these values to those of other models can help assess relative performance.
+Model Coefficients: All coefficients have been estimated with statistical significance (p-values are very small), suggesting the model terms are meaningful.
+2. Model Diagnostics
+Ljung-Box Test: Your p-value is 0.78, which is high, suggesting that there's no significant autocorrelation in the residuals. This is a good sign that your model has captured the underlying patterns in the data.
+Jarque-Bera Test: This test checks for normality of residuals. The very high p-value indicates non-normality, which might suggest that the residuals are not perfectly normally distributed. However, ARIMA models don’t necessarily require residuals to be normal, but it's often a desirable characteristic.
+Heteroskedasticity Test: Your p-value is 0.65, indicating that there's no significant evidence of heteroskedasticity. This is good, as it suggests the variability of residuals is consistent over time.
+
+
+Summary
+Based on the diagnostic tests and the RMSE:
+
+Good Signs: The model shows no significant autocorrelation in residuals and no significant heteroskedasticity. Coefficients are statistically significant.
+Areas of Improvement: Residuals are not perfectly normally distributed, and the AIC/BIC values are high, which may suggest room for improvement or comparison with other models.
+
+
+*Next Steps*:
+
+Compare with Other Models: Test different ARIMA configurations or other models (like SARIMA, Exponential Smoothing, etc.) to see if they provide a better fit.
+Cross-Validation: Use techniques like rolling-window cross-validation to ensure the model performs well out-of-sample.
+Model Refinement: Consider adjusting model parameters or incorporating additional features if applicable.
