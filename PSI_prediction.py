@@ -58,17 +58,47 @@ def calculate_rmse(df_test, df_predict):
     return rms
 
     
-def Model_parameter(dataframe):
+# def Model_parameter(dataframe):
     
-    #ARIMA regression model parameter setting
-    plot_acf(dataframe['national'], lags=1300, alpha=0.05)
-    pyplot.show()
-    plot_pacf(dataframe['national'], lags=15, alpha=0.05)
-    pyplot.show()
-    #The data is stationary
-    print(sts.adfuller(dataframe.national))
+#     #ARIMA regression model parameter setting
+#     plot_acf(dataframe['national'], lags=1300, alpha=0.05)
+#     pyplot.show()
+#     plot_pacf(dataframe['national'], lags=15, alpha=0.05)
+#     pyplot.show()
+#     #The data is stationary
+#     print(sts.adfuller(dataframe.national))
 
-    return 0
+#     return 0
+
+
+
+
+def plot_acf_pacf(dataframe):
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+    # Plot ACF
+    plot_acf(dataframe['national'], lags=1300, alpha=0.05, ax=ax1)
+    ax1.set_title('Autocorrelation Function (ACF)')
+
+    # Plot PACF
+    plot_pacf(dataframe['national'], lags=15, alpha=0.05, ax=ax2)
+    ax2.set_title('Partial Autocorrelation Function (PACF)')
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+
+    # Show plots
+    plt.show()
+
+    # Print stationarity test result
+    adf_result = sts.adfuller(dataframe['national'])
+    print(f'ADF Statistic: {adf_result[0]}')
+    print(f'p-value: {adf_result[1]}')
+    print(f'Critical Values: {adf_result[4]}')
+
+
+
 
 
 def PSI_prediction(data_csv_Address, my_date):
@@ -118,6 +148,9 @@ def PSI_prediction(data_csv_Address, my_date):
 
     print("df_train: ", df_train)
 
+    # # Model_parameters: 
+    # Model_parameter(dataframe) 
+    plot_acf_pacf(dataframe)
 
     # Train the model
     model_fit = fit_arima_model(df_train)
@@ -134,6 +167,8 @@ def PSI_prediction(data_csv_Address, my_date):
 
     except Exception as e:
         print(f"An error occurred while calculating RMSE: {e}")
+
+
     
     return model_fit.predict(start=index_position, end=index_position)
     
@@ -151,6 +186,119 @@ def main():
         return
     
     PSI_prediction('psi_df_2016_2019.csv', my_date)
+    
 
 if __name__ == "__main__":
     main()
+
+
+#--------------------------------------------------------------------------------- crossfold validation 
+
+
+# Rolling Forecast Origin Cross-Validation
+# In this approach, you use a rolling window to train and test the model. For each fold, the training set is expanded and the model is tested on the next time period.
+
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.metrics import mean_squared_error
+
+def rolling_forecast_cv(series, order, window_size, step_size=1):
+    """Perform rolling forecast cross-validation for ARIMA model.
+
+    Args:
+        series (pd.Series): The time series data.
+        order (tuple): The ARIMA model order (p, d, q).
+        window_size (int): The size of the rolling window.
+        step_size (int): The step size for rolling window.
+
+    Returns:
+        list: A list of RMSE values for each fold.
+    """
+    rmses = []
+    n = len(series)
+    
+    for start in range(0, n - window_size, step_size):
+        train_end = start + window_size
+        train = series[:train_end]
+        test = series[train_end:train_end + step_size]
+        
+        model = ARIMA(train, order=order)
+        model_fit = model.fit()
+        
+        forecast = model_fit.forecast(steps=step_size)
+        rmse = np.sqrt(mean_squared_error(test, forecast))
+        rmses.append(rmse)
+    
+    return rmses
+
+"""#------------------------------------------------------------------------------------------------- Example usage
+
+
+
+series = pd.read_csv('psi_df_2016_2019.csv', encoding='ISO-8859-1', parse_dates=['timestamp'], index_col='timestamp')['national']
+order = (5, 1, 10)  # Example ARIMA order
+window_size = 1000  # Example rolling window size
+
+rmses = rolling_forecast_cv(series, order, window_size)
+print(f'Average RMSE: {np.mean(rmses)}')"""
+
+
+
+# Expanding Window Cross-Validation
+# In this approach, you start with an initial training set and progressively expand it while testing on subsequent time periods.
+
+def expanding_window_cv(series, order, initial_size, step_size=1):
+    """Perform expanding window cross-validation for ARIMA model.
+
+    Args:
+        series (pd.Series): The time series data.
+        order (tuple): The ARIMA model order (p, d, q).
+        initial_size (int): The size of the initial training set.
+        step_size (int): The step size for expanding window.
+
+    Returns:
+        list: A list of RMSE values for each fold.
+    """
+    rmses = []
+    n = len(series)
+    
+    for start in range(initial_size, n, step_size):
+        train = series[:start]
+        test = series[start:start + step_size]
+        
+        model = ARIMA(train, order=order)
+        model_fit = model.fit()
+        
+        forecast = model_fit.forecast(steps=step_size)
+        rmse = np.sqrt(mean_squared_error(test, forecast))
+        rmses.append(rmse)
+    
+    return rmses
+
+"""#------------------------------------------------------------------------------------------------- Example usage
+
+initial_size = 1000  # Example initial training size
+rmses = expanding_window_cv(series, order, initial_size)
+print(f'Average RMSE: {np.mean(rmses)}')"""
+
+
+##############################################################################  Visualize RMSE Cross Fold validation
+
+def plot_cv_results(rmses, title):
+    """Plot cross-validation results.
+
+    Args:
+        rmses (list): List of RMSE values from cross-validation.
+        title (str): Title of the plot.
+    """
+    plt.figure(figsize=(10, 6))
+    plt.plot(rmses, marker='o', linestyle='-', color='b')
+    plt.xlabel('Fold')
+    plt.ylabel('RMSE')
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+"""#---------------------------------------------------------------------------------------------------------Example usage
+plot_cv_results(rmses, 'Rolling Forecast Cross-Validation RMSE')"""
